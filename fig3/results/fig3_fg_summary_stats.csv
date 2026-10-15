@@ -1,0 +1,7 @@
+"trait","genotype","q1","med","q3"
+"Middle of rSY","WT",0,0,0.25
+"Middle of rSY","ec1",14.75,16.5,18
+"Proximal to EC","WT",0,0,0.25
+"Proximal to EC","ec1",19.75,21.5,24
+"In central cell","WT",1,1.5,2.25
+"In central cell","ec1",10.75,13,15.25
