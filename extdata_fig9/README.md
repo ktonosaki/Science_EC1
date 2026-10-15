@@ -1,6 +1,6 @@
 # Extended Data Fig. 9
 
-This folder contains the data and analysis script for the individual NM-line analysis corresponding to the Extended Data Fig. 9 description in the bioRxiv article.
+This folder contains the data and analysis script for the individual NM-line analysis corresponding to the Extended Data Fig. 9 description in the bioRxiv article. The count table is stored as a CSV and is read by the analysis script so the data are not duplicated in code.
 
 ## Files
 
@@ -9,4 +9,4 @@ This folder contains the data and analysis script for the individual NM-line ana
 
 ## Notes
 
-The raw values are reconstructed from the original analysis script and published figure description. This preserves the figure-specific data and plotting logic in a transparent, reproducible form for repository storage.
+The dataset in `extdata_fig9_seed_by_line.csv` is the source-of-truth data used by the analysis script. This preserves the figure-specific data and analysis logic in a transparent, reproducible form for repository storage.

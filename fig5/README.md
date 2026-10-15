@@ -1,6 +1,6 @@
 # Figure 5
 
-This folder contains the raw data and analysis script used for the Fig. 5 seed-normalization analysis.
+This folder contains the raw data and analysis script used for the Fig. 5 seed-normalization analysis. The count table is stored as a CSV and is read by the analysis script so the data are not duplicated in code.
 
 ## Files
 
@@ -9,4 +9,4 @@ This folder contains the raw data and analysis script used for the Fig. 5 seed-n
 
 ## Notes
 
-The dataset was reconstructed from the values embedded in the original script. This archive keeps the figure-specific raw values and analysis logic in one place for transparent reproducibility.
+The dataset in `fig5_normal_seed.csv` is the source-of-truth data used by the analysis script. This archive keeps the figure-specific raw values and analysis logic in one place for transparent reproducibility.

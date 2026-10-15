@@ -3,9 +3,21 @@ library(tidyr)
 library(ggplot2)
 library(ggbeeswarm)
 
+script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("^--file=", args, value = TRUE)
+  if (length(file_arg) > 0) {
+    normalizePath(dirname(sub("^--file=", "", file_arg[1])))
+  } else {
+    getwd()
+  }
+}
+script_path <- script_dir()
+setwd(script_path)
+
 # Read the raw Fig.5 seed counts
 # The original script was written directly as a pasted table; we preserve the values in CSV format.
-df <- read.csv("../data/fig5_normal_seed.csv", stringsAsFactors = FALSE)
+df <- read.csv(file.path(script_path, "..", "data", "fig5_normal_seed.csv"), stringsAsFactors = FALSE)
 
 # Compute total and treatment rate
 # The original script groups 'normal + aborted' as the successful developing fraction,

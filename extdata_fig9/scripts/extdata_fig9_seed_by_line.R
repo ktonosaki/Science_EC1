@@ -2,10 +2,22 @@ library(dplyr)
 library(ggplot2)
 library(ggbeeswarm)
 
+script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("^--file=", args, value = TRUE)
+  if (length(file_arg) > 0) {
+    normalizePath(dirname(sub("^--file=", "", file_arg[1])))
+  } else {
+    getwd()
+  }
+}
+script_path <- script_dir()
+setwd(script_path)
+
 # Extended Data Fig. 9: independent Sup35NM replacement lines
 # The raw values in this archive are reconstructed from the original analysis script.
 
-df <- read.csv("../data/extdata_fig9_seed_by_line.csv", stringsAsFactors = FALSE)
+df <- read.csv(file.path(script_path, "..", "data", "extdata_fig9_seed_by_line.csv"), stringsAsFactors = FALSE)
 
 df <- df %>%
   mutate(

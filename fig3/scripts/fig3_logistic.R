@@ -3,29 +3,32 @@ library(tidyr)
 library(ggplot2)
 library(ggbeeswarm)
 
+script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("^--file=", args, value = TRUE)
+  if (length(file_arg) > 0) {
+    normalizePath(dirname(sub("^--file=", "", file_arg[1])))
+  } else {
+    getwd()
+  }
+}
+script_path <- script_dir()
+setwd(script_path)
+
 # ---------------------------------------------------------------------------
-# Data reconstruction for Fig. 3 abnormal ovule phenotype analysis.
-# This script reproduces the original selection of wild-type and ec1 counts
-# and generates the boxplot summary used in the publication.
+# Fig. 3 abnormal ovule phenotype analysis.
+# Keep the raw counts in CSV form and load them here so the analysis script does
+# not duplicate the tabulated data in code.
 # ---------------------------------------------------------------------------
 
-ec1 <- data.frame(
-  genotype = "ec1",
-  total = c(72,74,74,66,66,67,63,67,61,68,61,68),
-  normal = c(5,11,5,5,11,15,6,4,6,6,10,9),
-  abnormal_1 = c(8,4,4,9,11,11,8,9,13,9,13,8),
-  abnormal_2 = c(16,16,15,12,18,16,16,15,14,20,14,16)
-)
-
-WT <- data.frame(
-  genotype = "WT",
-  total = c(47,64,64,69,63,67,70,59,73,56,67),
-  normal = c(27,27,33,21,36,42,42,32,23,31,38),
-  abnormal_1 = c(0,0,0,0,3,0,0,0,0,1,1),
-  abnormal_2 = c(0,0,0,0,0,0,0,0,0,0,0)
-)
-
-df <- bind_rows(ec1, WT)
+df <- read.csv(file.path(script_path, "..", "data", "fig3_abnormal_ovule.csv"), stringsAsFactors = FALSE) %>%
+  mutate(
+    genotype = factor(genotype, levels = c("WT", "ec1")),
+    total = as.integer(total),
+    normal = as.integer(normal),
+    abnormal_1 = as.integer(abnormal_1),
+    abnormal_2 = as.integer(abnormal_2)
+  )
 
 # Convert the count table to a long data frame for plotting and summary stats.
 df_long <- df %>%

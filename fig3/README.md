@@ -1,6 +1,6 @@
 # Figure 3
 
-This folder contains the raw data and analysis scripts used for Figure 3.
+This folder contains the raw data and analysis scripts used for Figure 3. The count table is stored as a CSV and is read by the analysis script so the data are not duplicated in code.
 
 ## Files
 
@@ -9,4 +9,4 @@ This folder contains the raw data and analysis scripts used for Figure 3.
 
 ## Data provenance
 
-The observation counts in `fig3_abnormal_ovule.csv` are derived from the values embedded in the original analysis script.
+The observation counts in `fig3_abnormal_ovule.csv` are the source-of-truth values used by the analysis script.
