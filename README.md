@@ -10,12 +10,9 @@ figures/
     README.md
     data/
       fig3_abnormal_ovule.csv
-      fig3_overpenetration.csv
     scripts/
       fig3_logistic.R
-      fig3_fg_overpenetration.R
     plots/
-      fig3_fg_overpenetration.pdf
       fig3_fg_central_cell_only.pdf
     results/
       fig3_fg_pvalues.csv
