@@ -41,6 +41,30 @@ contrasts <- list(
 pvals <- lapply(contrasts, function(pair) {
   g1 <- pair[1]
   g2 <- pair[2]
+  sub <- dplyr::filter(df, genotype2 %in% c(g1, g2)) %>%
+    mutate(genotype2 = factor(genotype2, levels = c(g1, g2)))
+
+  fit_null <- glm(
+    cbind(developing, total - developing) ~ 1,
+    family = binomial(link = "logit"),
+    data = sub
+  )
+  fit_full <- glm(
+    cbind(developing, total - developing) ~ genotype2,
+    family = binomial(link = "logit"),
+    data = sub
+  )
+  lrt <- anova(fit_null, fit_full, test = "LRT")
+
+  tibble(
+    contrast = paste(g1, g2, sep = " - "),
+    p_value = lrt$`Pr(>Chi)`[2]
+  )
+}) %>% bind_rows()
+
+fishers <- lapply(contrasts, function(pair) {
+  g1 <- pair[1]
+  g2 <- pair[2]
   sub <- dplyr::filter(df, genotype2 %in% c(g1, g2))
   mat <- matrix(c(
     sum(sub$developing[sub$genotype2 == g1]),
@@ -50,25 +74,25 @@ pvals <- lapply(contrasts, function(pair) {
   ), nrow = 2, byrow = TRUE)
   tibble(
     contrast = paste(g1, g2, sep = " - "),
-    p_value = fisher.test(mat)$p.value
+    fisher_p_value = fisher.test(mat)$p.value
   )
 }) %>% bind_rows()
 
-p_to_symbol <- function(p) {
-  if (p < 0.0001) return("****")
-  if (p < 0.001) return("***")
-  if (p < 0.01) return("**")
-  if (p < 0.05) return("*")
-  return("ns")
-}
+p_to_label <- function(p) sprintf("P = %.2e", p)
 
-pvals <- pvals %>% mutate(label = sapply(p_value, p_to_symbol))
+pvals <- pvals %>%
+  left_join(fishers, by = "contrast") %>%
+  mutate(label = sapply(p_value, p_to_label))
 
 max_rate <- max(df$rate)
 anno_df <- tibble(
   x1 = c(1, 1, 1),
   x2 = c(2, 3, 4),
-  y = c(max_rate + 3, max_rate + 8, max_rate + 13),
+  y = c(
+    min(75, max_rate * 0.82),
+    min(85, max_rate * 0.90),
+    min(95, max_rate * 0.97)
+  ),
   label = c(
     pvals$label[pvals$contrast == "ec1 - NM_1"],
     pvals$label[pvals$contrast == "ec1 - NM_2"],
@@ -146,5 +170,7 @@ print(p)
 
 ggsave("../plots/extdata_fig9_seed_by_line_summary.pdf", p, width = 5.5, height = 3.5)
 
+# The annotation values are drawn from the logistic regression validation, while the
+# Fisher exact values are included for cross-checking with the original analysis.
 write.csv(summary_df, "../results/extdata_fig9_seed_by_line_summary.csv", row.names = FALSE)
 write.csv(pvals, "../results/extdata_fig9_seed_by_line_pvalues.csv", row.names = FALSE)

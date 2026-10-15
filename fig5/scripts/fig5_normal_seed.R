@@ -41,9 +41,9 @@ summary_df <- df %>%
     .groups = "drop"
   )
 
-# Pairwise comparisons using Fisher exact tests against the original script logic.
-# Compare the fraction of developing seeds (normal + aborted) vs undeveloped seeds.
-# This mirrors the original pattern of tests for genotype effects.
+# Pairwise comparisons using a binomial logistic regression likelihood-ratio test.
+# This matches the paper-style validation annotation and is used for the figure labels.
+# Fisher exact tests are retained as a complementary sanity check below.
 contrast_pairs <- list(
   c("ec1", "NM"),
   c("ec1", "M"),
@@ -51,6 +51,33 @@ contrast_pairs <- list(
 )
 
 pvals <- lapply(contrast_pairs, function(pair) {
+  g1 <- pair[1]
+  g2 <- pair[2]
+  sub <- dplyr::filter(df, genotype2 %in% c(g1, g2)) %>%
+    mutate(genotype2 = factor(genotype2, levels = c(g1, g2)))
+
+  fit_null <- glm(
+    cbind(developing, total - developing) ~ 1,
+    family = binomial(link = "logit"),
+    data = sub
+  )
+  fit_full <- glm(
+    cbind(developing, total - developing) ~ genotype2,
+    family = binomial(link = "logit"),
+    data = sub
+  )
+  lrt <- anova(fit_null, fit_full, test = "LRT")
+
+  tibble(
+    contrast = paste(g1, g2, sep = " - "),
+    p_value = lrt$`Pr(>Chi)`[2]
+  )
+}) %>%
+  bind_rows()
+
+# Fisher exact tests are retained as a complementary check and are summarized in
+# the output CSV, but the figure annotation uses the logistic regression p-values.
+fishers <- lapply(contrast_pairs, function(pair) {
   g1 <- pair[1]
   g2 <- pair[2]
   sub <- dplyr::filter(df, genotype2 %in% c(g1, g2))
@@ -62,30 +89,27 @@ pvals <- lapply(contrast_pairs, function(pair) {
   ), nrow = 2, byrow = TRUE)
   tibble(
     contrast = paste(g1, g2, sep = " - "),
-    p_value = fisher.test(mat)$p.value
+    fisher_p_value = fisher.test(mat)$p.value
   )
-}) %>%
-  bind_rows()
+}) %>% bind_rows()
 
-p_to_symbol <- function(p) {
-  if (p < 0.0001) return("****")
-  if (p < 0.001) return("***")
-  if (p < 0.01) return("**")
-  if (p < 0.05) return("*")
-  return("ns")
-}
+p_to_label <- function(p) sprintf("P = %.2e", p)
 
 pvals <- pvals %>%
-  mutate(label = sapply(p_value, p_to_symbol))
+  left_join(fishers, by = "contrast") %>%
+  mutate(label = sapply(p_value, p_to_label))
 
 # Annotation positions matching the original publication-style plots.
-# Because the plot contains three genotype groups only, positions must stay within
-# x = 1, 2, 3 to avoid warnings from out-of-range segments.
+# Keep the bars inside the plotted range so the output is clean and publication-ready.
 max_rate <- max(df$rate)
 anno_df <- tibble(
   x1 = c(1, 1, 2),
   x2 = c(2, 3, 3),
-  y = c(max_rate + 3, max_rate + 8, max_rate + 13),
+  y = c(
+    min(90, max_rate * 0.85),
+    min(94, max_rate * 0.90),
+    min(98, max_rate * 0.97)
+  ),
   label = c(
     pvals$label[pvals$contrast == "ec1 - NM"],
     pvals$label[pvals$contrast == "ec1 - M"],
@@ -163,6 +187,8 @@ print(p)
 
 ggsave("../plots/fig5_normal_seed_summary.pdf", p, width = 5.5, height = 3.5)
 
-# Output a concise result table
+# Output a concise result table.
+# The main annotation values are the model-based p-values, while the Fisher exact
+# values are retained in the same CSV for cross-checking against the original script.
 write.csv(summary_df, "../results/fig5_normal_seed_summary.csv", row.names = FALSE)
 write.csv(pvals, "../results/fig5_normal_seed_pvalues.csv", row.names = FALSE)

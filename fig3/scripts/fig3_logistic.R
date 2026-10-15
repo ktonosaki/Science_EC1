@@ -54,7 +54,9 @@ sum_df <- df_long %>%
     .groups = "drop"
   )
 
-# Fisher exact tests for each phenotype class as in the original figure analysis.
+# Keep the figure annotations aligned with the paper's statistical validation:
+# the main annotation labels are based on the binomial logistic regression model.
+# Fisher exact tests are retained only as a complementary sanity check.
 mat1 <- matrix(c(
   sum(df$abnormal_1[df$genotype == "ec1"]),
   sum(df$total[df$genotype == "ec1"] - df$abnormal_1[df$genotype == "ec1"]),
@@ -73,15 +75,40 @@ mat2 <- matrix(c(
 
 p2 <- fisher.test(mat2)$p.value
 
-# Convert p-values to significance symbols matching the publication style.
-p_to_symbol <- function(p) {
-  if (p < 0.0001) return("****")
-  if (p < 0.001) return("***")
-  if (p < 0.01) return("**")
-  if (p < 0.05) return("*")
-  return("ns")
-}
+fisher_results <- tibble(
+  pheno = levels(df_long$pheno),
+  fisher_p_value = c(p1, p2)
+)
 
+# Show the exact p-value in the publication-style annotation instead of asterisks.
+p_to_label <- function(p) sprintf("P = %.2e", p)
+
+# Logistic regression is the validation used for the figure annotation in the paper.
+logit_results <- df_long %>%
+  group_by(pheno) %>%
+  group_modify(~ {
+    fit_null <- glm(
+      cbind(abnormal, total - abnormal) ~ 1,
+      family = binomial(link = "logit"),
+      data = .x
+    )
+    fit_full <- glm(
+      cbind(abnormal, total - abnormal) ~ genotype,
+      family = binomial(link = "logit"),
+      data = .x
+    )
+    lrt <- anova(fit_null, fit_full, test = "LRT")
+
+    tibble(
+      chi_square = lrt$Deviance[2],
+      df = lrt$Df[2],
+      p_value = lrt$`Pr(>Chi)`[2]
+    )
+  }) %>%
+  ungroup() %>%
+  mutate(label = sapply(p_value, p_to_label))
+
+# Use the model-based p-values for the annotation labels shown in the figure.
 anno_df <- data.frame(
   pheno = levels(df_long$pheno),
   x1 = 1,
@@ -90,7 +117,7 @@ anno_df <- data.frame(
     max(df_long$rate[df_long$pheno == levels(df_long$pheno)[1]]) + 5,
     max(df_long$rate[df_long$pheno == levels(df_long$pheno)[2]]) + 5
   ),
-  label = c(p_to_symbol(p1), p_to_symbol(p2))
+  label = logit_results$label
 )
 
 # Create the publication-style boxplot with beeswarm points and significance bars.
@@ -177,29 +204,9 @@ ggsave("../plots/abnormal_ovule_synergid.pdf", p, width = 3.5, height = 3)
 
 # ---------------------------------------------------------------------------
 # Binomial logistic regression with a likelihood-ratio test.
-# This is an additional validation of the genotype effect beyond the Fisher test.
+# These are the validation results used to match the paper's annotation logic.
 # ---------------------------------------------------------------------------
-logit_results <- df_long %>%
-  group_by(pheno) %>%
-  group_modify(~ {
-    fit_null <- glm(
-      cbind(abnormal, total - abnormal) ~ 1,
-      family = binomial(link = "logit"),
-      data = .x
-    )
-    fit_full <- glm(
-      cbind(abnormal, total - abnormal) ~ genotype,
-      family = binomial(link = "logit"),
-      data = .x
-    )
-    lrt <- anova(fit_null, fit_full, test = "LRT")
-
-    tibble(
-      chi_square = lrt$Deviance[2],
-      df = lrt$Df[2],
-      p_value = lrt$`Pr(>Chi)`[2]
-    )
-  }) %>%
-  ungroup()
+logit_results <- logit_results %>%
+  arrange(factor(pheno, levels = levels(df_long$pheno)))
 
 print(logit_results)
