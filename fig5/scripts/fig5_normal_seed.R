@@ -195,8 +195,6 @@ p <- ggplot(df, aes(x = genotype2, y = rate, color = genotype2)) +
     axis.title.y = element_text(size = 11)
   )
 
-print(p)
-
 ggsave("../plots/fig5_normal_seed_summary.pdf", p, width = 5.5, height = 3.5)
 
 # Output a concise result table.

@@ -200,8 +200,6 @@ p <- ggplot(df_long, aes(x = genotype, y = rate, color = genotype)) +
     legend.position = "none"
   )
 
-print(p)
-
 if (!dir.exists("../plots")) dir.create("../plots", recursive = TRUE)
 ggsave("../plots/abnormal_ovule_synergid.pdf", p, width = 3.5, height = 3)
 
@@ -213,3 +211,12 @@ logit_results <- logit_results %>%
   arrange(factor(pheno, levels = levels(df_long$pheno)))
 
 print(logit_results)
+
+if (!dir.exists("../results")) dir.create("../results", recursive = TRUE)
+
+pval_df <- logit_results %>%
+  left_join(fisher_results, by = "pheno") %>%
+  select(pheno, p_value, fisher_p_value, label)
+
+write.csv(sum_df, "../results/fig3_abnormal_ovule_summary.csv", row.names = FALSE)
+write.csv(pval_df, "../results/fig3_abnormal_ovule_pvalues.csv", row.names = FALSE)
