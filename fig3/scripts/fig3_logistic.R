@@ -16,7 +16,7 @@ script_path <- script_dir()
 setwd(script_path)
 
 # ---------------------------------------------------------------------------
-# Fig. 3 abnormal ovule phenotype analysis.
+# Fig. 3f abnormal ovule phenotype analysis.
 # Keep the raw counts in CSV form and load them here so the analysis script does
 # not duplicate the tabulated data in code.
 # ---------------------------------------------------------------------------
@@ -79,8 +79,8 @@ mat2 <- matrix(c(
 p2 <- fisher.test(mat2)$p.value
 
 fisher_results <- tibble(
-  pheno = levels(df_long$pheno),
-  fisher_p_value = c(p1, p2)
+ pheno = levels(df_long$pheno),
+ fisher_p_value = c(p1, p2)
 )
 
 # Show the exact p-value in the publication-style annotation instead of asterisks.

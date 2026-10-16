@@ -9,13 +9,18 @@ fig3/
   README.md
   data/
     fig3_abnormal_ovule.csv
+    fig3_overpenetration_reconstructed.csv
   scripts/
     fig3_logistic.R
+    fig3_g_overpenetration.R
   plots/
     fig3_abnormal_ovule_summary.pdf
+    fig3_g_overpenetration_summary.pdf
   results/
     fig3_abnormal_ovule_pvalues.csv
     fig3_abnormal_ovule_summary.csv
+    fig3_g_overpenetration_pvalues.csv
+    fig3_g_overpenetration_summary.csv
 
 fig5/
   README.md
