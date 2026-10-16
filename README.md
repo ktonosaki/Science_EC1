@@ -12,7 +12,7 @@ fig3/
   scripts/
     fig3_logistic.R
   plots/
-    abnormal_ovule_synergid.pdf
+    fig3_abnormal_ovule_summary.pdf
   results/
     fig3_abnormal_ovule_pvalues.csv
     fig3_abnormal_ovule_summary.csv

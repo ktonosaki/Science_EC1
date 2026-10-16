@@ -43,7 +43,7 @@ df_long <- df %>%
     pheno = factor(
       pheno,
       levels = c("abnormal_2", "abnormal_1"),
-      labels = c("Near egg cell", "In synergid")
+      labels = c("In synergid", "In central cell")
     )
   )
 
@@ -201,7 +201,7 @@ p <- ggplot(df_long, aes(x = genotype, y = rate, color = genotype)) +
   )
 
 if (!dir.exists("../plots")) dir.create("../plots", recursive = TRUE)
-ggsave("../plots/abnormal_ovule_synergid.pdf", p, width = 3.5, height = 3)
+ggsave("../plots/fig3_abnormal_ovule_summary.pdf", p, width = 3.5, height = 3)
 
 # ---------------------------------------------------------------------------
 # Binomial logistic regression with a likelihood-ratio test.
