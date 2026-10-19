@@ -45,32 +45,32 @@ contrast_pairs <- list(
   c("ec1", "NM_3")
 )
 
-logit_results <- lapply(contrast_pairs, function(pair) {
-  g1 <- pair[1]
-  g2 <- pair[2]
-  sub <- dplyr::filter(df, genotype2 %in% c(g1, g2)) %>%
-    mutate(genotype2 = factor(genotype2, levels = c(g1, g2)))
+fit <- glm(
+  cbind(developing, total - developing) ~ genotype2,
+  family = binomial(link = "logit"),
+  data = df
+)
 
-  fit_null <- glm(
-    cbind(developing, total - developing) ~ 1,
-    family = binomial(link = "logit"),
-    data = sub
-  )
-  fit_full <- glm(
-    cbind(developing, total - developing) ~ genotype2,
-    family = binomial(link = "logit"),
-    data = sub
-  )
-  lrt <- anova(fit_null, fit_full, test = "LRT")
+coef_vec <- coef(fit)
+vcov_mat <- vcov(fit)
+contrast_mat <- rbind(
+  `ec1 - NM_1` = c(0, -1, 0, 0),
+  `ec1 - NM_2` = c(0, 0, -1, 0),
+  `ec1 - NM_3` = c(0, 0, 0, -1)
+)
 
-  tibble(
-    contrast = paste(g1, g2, sep = " - "),
-    chi_square = lrt$Deviance[2],
-    df = lrt$Df[2],
-    p_value_raw = lrt$`Pr(>Chi)`[2]
-  )
-}) %>%
-  bind_rows() %>%
+estimate <- as.vector(contrast_mat %*% coef_vec)
+std_error <- sqrt(diag(contrast_mat %*% vcov_mat %*% t(contrast_mat)))
+z_value <- estimate / std_error
+p_value_raw <- 2 * pnorm(abs(z_value), lower.tail = FALSE)
+
+logit_results <- tibble(
+  contrast = rownames(contrast_mat),
+  estimate = estimate,
+  std_error = std_error,
+  z_value = z_value,
+  p_value_raw = p_value_raw
+) %>%
   mutate(
     p_value = p.adjust(p_value_raw, method = "BH"),
     label = sprintf("P = %.2e", p_value)

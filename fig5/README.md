@@ -13,7 +13,7 @@ This folder contains the raw data and analysis script used for the Fig. 5 seed-n
 - `results/fig5_normal_seed_summary.csv`: quartile and median summary statistics used for the plot overlays.
 - `results/fig5_normal_seed_pvalues.csv`: pairwise logistic LRT results used for figure annotations.
 - `results/fig5_e_abnormal_ovule_summary.csv`: quartile and median summary statistics for the Fig. 5e plot.
-- `results/fig5_e_abnormal_ovule_pvalues.csv`: pairwise logistic LRT (BH-adjusted) results used for Fig. 5e annotations.
+- `results/fig5_e_abnormal_ovule_pvalues.csv`: pairwise logistic-model contrast results (BH-adjusted) used for Fig. 5e annotations.
 
 ## Notes
 
