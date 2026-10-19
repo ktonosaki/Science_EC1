@@ -1,2 +1,2 @@
-"trait","p_value","label"
-"In central cell",1.2287927350602e-08,"P = 1.23e-08"
+"pheno","chi_square","df","p_value","label"
+"central cell",64.4859254453533,1,9.72243723362588e-16,"P = 9.72e-16"

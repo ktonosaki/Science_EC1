@@ -9,7 +9,7 @@ fig3/
   README.md
   data/
     fig3_abnormal_ovule.csv
-    fig3_overpenetration_reconstructed.csv
+    fig3_g_overpenetration_counts.csv
   scripts/
     fig3_logistic.R
     fig3_g_overpenetration.R
