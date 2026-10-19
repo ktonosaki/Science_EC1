@@ -25,26 +25,26 @@ fig3/
 fig5/
   README.md
   data/
-    fig5_normal_seed.csv
+    fig5_abnormal_ovule_counts.csv
   scripts/
-    fig5_normal_seed.R
+    fig5_abnormal_ovule.R
   plots/
-    fig5_normal_seed_summary.pdf
+    fig5_abnormal_ovule_summary.pdf
   results/
-    fig5_normal_seed_pvalues.csv
-    fig5_normal_seed_summary.csv
+    fig5_abnormal_ovule_pvalues.csv
+    fig5_abnormal_ovule_summary.csv
 
 extdata_fig9/
   README.md
   data/
-    extdata_fig9_seed_by_line.csv
+    extdata_fig9_abnormal_by_line_counts.csv
   scripts/
-    extdata_fig9_seed_by_line.R
+    extdata_fig9_abnormal_by_line.R
   plots/
-    extdata_fig9_seed_by_line_summary.pdf
+    extdata_fig9_abnormal_by_line_summary.pdf
   results/
-    extdata_fig9_seed_by_line_pvalues.csv
-    extdata_fig9_seed_by_line_summary.csv
+    extdata_fig9_abnormal_by_line_pvalues.csv
+    extdata_fig9_abnormal_by_line_summary.csv
 ```
 
 Each figure gets its own directory so data, scripts, and figure-specific notes remain isolated and easy to track.
