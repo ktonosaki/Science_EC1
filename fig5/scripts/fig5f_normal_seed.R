@@ -14,7 +14,7 @@ script_dir <- function() {
 script_path <- script_dir()
 setwd(script_path)
 
-df <- read.csv(file.path(script_path, "..", "data", "fig5_normal_seed.csv"), stringsAsFactors = FALSE) %>%
+df <- read.csv(file.path(script_path, "..", "data", "fig5f_normal_seed.csv"), stringsAsFactors = FALSE) %>%
   mutate(
     total = normal + aborted + undeveloped,
     developing = normal + aborted,
@@ -160,6 +160,6 @@ p <- ggplot(df, aes(x = genotype2, y = rate, color = genotype2)) +
 if (!dir.exists("../plots")) dir.create("../plots", recursive = TRUE)
 if (!dir.exists("../results")) dir.create("../results", recursive = TRUE)
 
-ggsave("../plots/fig5_normal_seed_summary.pdf", p, width = 5.5, height = 3.5)
-write.csv(summary_df, "../results/fig5_normal_seed_summary.csv", row.names = FALSE)
-write.csv(logit_results, "../results/fig5_normal_seed_pvalues.csv", row.names = FALSE)
+ggsave("../plots/fig5f_normal_seed.pdf", p, width = 5.5, height = 3.5)
+write.csv(summary_df, "../results/fig5f_normal_seed_summary.csv", row.names = FALSE)
+write.csv(logit_results, "../results/fig5f_normal_seed_pvalues.csv", row.names = FALSE)

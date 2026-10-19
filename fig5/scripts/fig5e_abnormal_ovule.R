@@ -15,7 +15,7 @@ script_path <- script_dir()
 setwd(script_path)
 
 df <- read.csv(
-  file.path(script_path, "..", "data", "fig5_abnormal_ovule_counts.csv"),
+  file.path(script_path, "..", "data", "fig5e_abnormal_ovule_counts.csv"),
   stringsAsFactors = FALSE
 ) %>%
   mutate(
@@ -154,6 +154,6 @@ p <- ggplot(df, aes(x = genotype2, y = rate, color = genotype2)) +
 if (!dir.exists("../plots")) dir.create("../plots", recursive = TRUE)
 if (!dir.exists("../results")) dir.create("../results", recursive = TRUE)
 
-ggsave("../plots/fig5_e_abnormal_ovule_plot.pdf", p, width = 5, height = 3)
-write.csv(sum_df, "../results/fig5_e_abnormal_ovule_summary.csv", row.names = FALSE)
-write.csv(logit_results, "../results/fig5_e_abnormal_ovule_pvalues.csv", row.names = FALSE)
+ggsave("../plots/fig5e_abnormal_ovule.pdf", p, width = 5, height = 3)
+write.csv(sum_df, "../results/fig5e_abnormal_ovule_summary.csv", row.names = FALSE)
+write.csv(logit_results, "../results/fig5e_abnormal_ovule_pvalues.csv", row.names = FALSE)

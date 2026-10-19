@@ -21,7 +21,7 @@ setwd(script_path)
 # ---------------------------------------------------------------------------
 
 df <- read.csv(
-  file.path(script_path, "..", "data", "fig3_g_overpenetration_counts.csv"),
+  file.path(script_path, "..", "data", "fig3g_overpenetration_counts.csv"),
   stringsAsFactors = FALSE
 ) %>%
   mutate(
@@ -157,6 +157,6 @@ p <- ggplot(df_long, aes(x = genotype, y = rate, color = genotype)) +
 if (!dir.exists("../plots")) dir.create("../plots", recursive = TRUE)
 if (!dir.exists("../results")) dir.create("../results", recursive = TRUE)
 
-ggsave("../plots/fig3_g_overpenetration_summary.pdf", p, width = 3, height = 3)
-write.csv(summary_df, "../results/fig3_g_overpenetration_summary.csv", row.names = FALSE)
-write.csv(logit_results, "../results/fig3_g_overpenetration_pvalues.csv", row.names = FALSE)
+ggsave("../plots/fig3g_overpenetration.pdf", p, width = 3, height = 3)
+write.csv(summary_df, "../results/fig3g_overpenetration_summary.csv", row.names = FALSE)
+write.csv(logit_results, "../results/fig3g_overpenetration_pvalues.csv", row.names = FALSE)

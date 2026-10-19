@@ -21,7 +21,7 @@ setwd(script_path)
 # not duplicate the tabulated data in code.
 # ---------------------------------------------------------------------------
 
-df <- read.csv(file.path(script_path, "..", "data", "fig3_abnormal_ovule.csv"), stringsAsFactors = FALSE) %>%
+df <- read.csv(file.path(script_path, "..", "data", "fig3f_abnormal_ovule.csv"), stringsAsFactors = FALSE) %>%
   mutate(
     genotype = factor(genotype, levels = c("WT", "ec1")),
     total = as.integer(total),
@@ -201,7 +201,7 @@ p <- ggplot(df_long, aes(x = genotype, y = rate, color = genotype)) +
   )
 
 if (!dir.exists("../plots")) dir.create("../plots", recursive = TRUE)
-ggsave("../plots/fig3_abnormal_ovule_summary.pdf", p, width = 3.5, height = 3)
+ggsave("../plots/fig3f_abnormal_ovule.pdf", p, width = 3.5, height = 3)
 
 # ---------------------------------------------------------------------------
 # Binomial logistic regression with a likelihood-ratio test.
@@ -218,5 +218,5 @@ pval_df <- logit_results %>%
   left_join(fisher_results, by = "pheno") %>%
   select(pheno, p_value, fisher_p_value, label)
 
-write.csv(sum_df, "../results/fig3_abnormal_ovule_summary.csv", row.names = FALSE)
-write.csv(pval_df, "../results/fig3_abnormal_ovule_pvalues.csv", row.names = FALSE)
+write.csv(sum_df, "../results/fig3f_abnormal_ovule_summary.csv", row.names = FALSE)
+write.csv(pval_df, "../results/fig3f_abnormal_ovule_pvalues.csv", row.names = FALSE)
