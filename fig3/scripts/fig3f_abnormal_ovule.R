@@ -42,7 +42,7 @@ df_long <- df %>%
     genotype = factor(genotype, levels = c("WT", "ec1")),
     pheno = factor(
       pheno,
-      levels = c("abnormal_2", "abnormal_1"),
+      levels = c("abnormal_1", "abnormal_2"),
       labels = c("Middle of rSY", "Proximal to EC")
     )
   )
