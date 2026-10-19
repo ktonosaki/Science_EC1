@@ -42,7 +42,7 @@ df_long <- df %>%
     genotype = factor(genotype, levels = c("WT", "ec1")),
     pheno = factor(
       pheno,
-      levels = c("abnormal_1", "abnormal_2"),
+      levels = c("abnormal_2", "abnormal_1"),
       labels = c("Middle of rSY", "Proximal to EC")
     )
   )
@@ -79,9 +79,17 @@ mat2 <- matrix(c(
 p2 <- fisher.test(mat2)$p.value
 
 fisher_results <- tibble(
- pheno = levels(df_long$pheno),
- fisher_p_value = c(p1, p2)
-)
+  pheno_raw = c("abnormal_1", "abnormal_2"),
+  fisher_p_value = c(p1, p2)
+) %>%
+  mutate(
+    pheno = factor(
+      pheno_raw,
+      levels = c("abnormal_2", "abnormal_1"),
+      labels = c("Middle of rSY", "Proximal to EC")
+    )
+  ) %>%
+  select(pheno, fisher_p_value)
 
 # Show the exact p-value in the publication-style annotation instead of asterisks.
 p_to_label <- function(p) sprintf("P = %.2e", p)
@@ -215,7 +223,8 @@ print(logit_results)
 if (!dir.exists("../results")) dir.create("../results", recursive = TRUE)
 
 pval_df <- logit_results %>%
-  left_join(fisher_results, by = "pheno") %>%
+  mutate(pheno = as.character(pheno)) %>%
+  left_join(fisher_results %>% mutate(pheno = as.character(pheno)), by = "pheno") %>%
   select(pheno, p_value, fisher_p_value, label)
 
 write.csv(sum_df, "../results/fig3f_abnormal_ovule_summary.csv", row.names = FALSE)
