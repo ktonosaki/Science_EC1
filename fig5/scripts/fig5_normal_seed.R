@@ -14,21 +14,19 @@ script_dir <- function() {
 script_path <- script_dir()
 setwd(script_path)
 
-df <- read.csv(
-  file.path(script_path, "..", "data", "fig5_abnormal_ovule_counts.csv"),
-  stringsAsFactors = FALSE
-) %>%
+df <- read.csv(file.path(script_path, "..", "data", "fig5_normal_seed.csv"), stringsAsFactors = FALSE) %>%
   mutate(
-    genotype = factor(genotype, levels = c("WT", "ec1", "NM_1", "NM_2", "NM_3", "M_1")),
-    normal = as.integer(normal),
-    abnormal = as.integer(abnormal),
-    total = normal + abnormal,
-    rate = 100 * abnormal / total,
+    total = normal + aborted + undeveloped,
+    developing = normal + aborted,
+    rate = 100 * developing / total,
     genotype2 = case_when(
-      genotype %in% c("NM_1", "NM_2", "NM_3") ~ "NM",
-      TRUE ~ as.character(genotype)
+      genotype == "WT" ~ "WT",
+      genotype == "ec1_null" ~ "ec1",
+      grepl("SUP35NM", genotype) ~ "NM",
+      genotype == "ec1_null+SUP35M" ~ "M",
+      TRUE ~ genotype
     ),
-    genotype2 = factor(genotype2, levels = c("WT", "ec1", "NM", "M_1"))
+    genotype2 = factor(genotype2, levels = c("WT", "ec1", "NM", "M"))
   )
 
 summary_df <- df %>%
@@ -42,23 +40,23 @@ summary_df <- df %>%
 
 contrast_pairs <- list(
   c("ec1", "NM"),
-  c("ec1", "M_1"),
-  c("NM", "M_1")
+  c("ec1", "M"),
+  c("NM", "M")
 )
 
-pvals <- lapply(contrast_pairs, function(pair) {
+logit_results <- lapply(contrast_pairs, function(pair) {
   g1 <- pair[1]
   g2 <- pair[2]
   sub <- dplyr::filter(df, genotype2 %in% c(g1, g2)) %>%
     mutate(genotype2 = factor(genotype2, levels = c(g1, g2)))
 
   fit_null <- glm(
-    cbind(abnormal, normal) ~ 1,
+    cbind(developing, total - developing) ~ 1,
     family = binomial(link = "logit"),
     data = sub
   )
   fit_full <- glm(
-    cbind(abnormal, normal) ~ genotype2,
+    cbind(developing, total - developing) ~ genotype2,
     family = binomial(link = "logit"),
     data = sub
   )
@@ -68,25 +66,28 @@ pvals <- lapply(contrast_pairs, function(pair) {
     contrast = paste(g1, g2, sep = " - "),
     chi_square = lrt$Deviance[2],
     df = lrt$Df[2],
-    p_value = lrt$`Pr(>Chi)`[2]
+    p_value_raw = lrt$`Pr(>Chi)`[2]
   )
 }) %>%
   bind_rows() %>%
-  mutate(label = sprintf("P = %.2e", p_value))
+  mutate(
+    p_value = p.adjust(p_value_raw, method = "BH"),
+    label = sprintf("P = %.2e", p_value)
+  )
 
 max_rate <- max(df$rate)
 anno_df <- tibble(
   x1 = c(2, 2, 3),
   x2 = c(3, 4, 4),
   y = c(
-    min(26, max_rate * 0.80),
-    min(28, max_rate * 0.88),
-    min(30, max_rate * 0.96)
+    min(90, max_rate * 0.85),
+    min(94, max_rate * 0.90),
+    min(98, max_rate * 0.97)
   ),
   label = c(
-    pvals$label[pvals$contrast == "ec1 - NM"],
-    pvals$label[pvals$contrast == "ec1 - M_1"],
-    pvals$label[pvals$contrast == "NM - M_1"]
+    logit_results$label[logit_results$contrast == "ec1 - NM"],
+    logit_results$label[logit_results$contrast == "ec1 - M"],
+    logit_results$label[logit_results$contrast == "NM - M"]
   )
 )
 
@@ -131,24 +132,24 @@ p <- ggplot(df, aes(x = genotype2, y = rate, color = genotype2)) +
   ) +
   geom_segment(
     data = anno_df,
-    aes(x = x1, xend = x1, y = y, yend = y - 0.5),
+    aes(x = x1, xend = x1, y = y, yend = y - 2),
     inherit.aes = FALSE,
     linewidth = 0.4
   ) +
   geom_segment(
     data = anno_df,
-    aes(x = x2, xend = x2, y = y, yend = y - 0.5),
+    aes(x = x2, xend = x2, y = y, yend = y - 2),
     inherit.aes = FALSE,
     linewidth = 0.4
   ) +
   geom_text(
     data = anno_df,
-    aes(x = (x1 + x2) / 2, y = y + 0.8, label = label),
+    aes(x = (x1 + x2) / 2, y = y + 2, label = label),
     inherit.aes = FALSE,
     size = 4
   ) +
-  scale_color_manual(values = c("WT" = "grey40", "ec1" = "#D95F02", "NM" = "#7570B3", "M_1" = "#1B9E77")) +
-  scale_y_continuous(name = "Abnormal ovules (%)", limits = c(0, 32)) +
+  scale_color_manual(values = c("WT" = "grey40", "ec1" = "#D95F02", "NM" = "#7570B3", "M" = "#1B9E77")) +
+  scale_y_continuous(name = "Normal seeds (%)", limits = c(0, 100)) +
   xlab(NULL) +
   theme_classic(base_size = 11) +
   theme(
@@ -159,6 +160,6 @@ p <- ggplot(df, aes(x = genotype2, y = rate, color = genotype2)) +
 if (!dir.exists("../plots")) dir.create("../plots", recursive = TRUE)
 if (!dir.exists("../results")) dir.create("../results", recursive = TRUE)
 
-ggsave("../plots/fig5_abnormal_ovule_summary.pdf", p, width = 5.5, height = 3.5)
-write.csv(summary_df, "../results/fig5_abnormal_ovule_summary.csv", row.names = FALSE)
-write.csv(pvals, "../results/fig5_abnormal_ovule_pvalues.csv", row.names = FALSE)
+ggsave("../plots/fig5_normal_seed_summary.pdf", p, width = 5.5, height = 3.5)
+write.csv(summary_df, "../results/fig5_normal_seed_summary.csv", row.names = FALSE)
+write.csv(logit_results, "../results/fig5_normal_seed_pvalues.csv", row.names = FALSE)
