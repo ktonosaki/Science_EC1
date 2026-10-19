@@ -25,12 +25,17 @@ fig3/
 fig5/
   README.md
   data/
+    fig5_abnormal_ovule_counts.csv
     fig5_normal_seed.csv
   scripts/
+    fig5_e_abnormal_ovule.R
     fig5_normal_seed.R
   plots/
+    fig5_e_abnormal_ovule_plot.pdf
     fig5_normal_seed_summary.pdf
   results/
+    fig5_e_abnormal_ovule_pvalues.csv
+    fig5_e_abnormal_ovule_summary.csv
     fig5_normal_seed_pvalues.csv
     fig5_normal_seed_summary.csv
 
