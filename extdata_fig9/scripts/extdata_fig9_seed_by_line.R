@@ -45,32 +45,32 @@ contrast_pairs <- list(
   c("ec1", "NM_3")
 )
 
-fit <- glm(
-  cbind(developing, total - developing) ~ genotype2,
-  family = binomial(link = "logit"),
-  data = df
-)
+logit_results <- lapply(contrast_pairs, function(pair) {
+  g1 <- pair[1]
+  g2 <- pair[2]
+  sub <- dplyr::filter(df, genotype2 %in% c(g1, g2)) %>%
+    mutate(genotype2 = factor(genotype2, levels = c(g1, g2)))
 
-coef_vec <- coef(fit)
-vcov_mat <- vcov(fit)
-contrast_mat <- rbind(
-  `ec1 - NM_1` = c(0, -1, 0, 0),
-  `ec1 - NM_2` = c(0, 0, -1, 0),
-  `ec1 - NM_3` = c(0, 0, 0, -1)
-)
+  fit_null <- glm(
+    cbind(developing, total - developing) ~ 1,
+    family = binomial(link = "logit"),
+    data = sub
+  )
+  fit_full <- glm(
+    cbind(developing, total - developing) ~ genotype2,
+    family = binomial(link = "logit"),
+    data = sub
+  )
+  lrt <- anova(fit_null, fit_full, test = "LRT")
 
-estimate <- as.vector(contrast_mat %*% coef_vec)
-std_error <- sqrt(diag(contrast_mat %*% vcov_mat %*% t(contrast_mat)))
-z_value <- estimate / std_error
-p_value_raw <- 2 * pnorm(abs(z_value), lower.tail = FALSE)
-
-logit_results <- tibble(
-  contrast = rownames(contrast_mat),
-  estimate = estimate,
-  std_error = std_error,
-  z_value = z_value,
-  p_value_raw = p_value_raw
-) %>%
+  tibble(
+    contrast = paste(g1, g2, sep = " - "),
+    chi_square = lrt$Deviance[2],
+    df = lrt$Df[2],
+    p_value_raw = lrt$`Pr(>Chi)`[2]
+  )
+}) %>%
+  bind_rows() %>%
   mutate(
     p_value = p.adjust(p_value_raw, method = "BH"),
     label = sprintf("P = %.2e", p_value)
@@ -80,11 +80,7 @@ max_rate <- max(df$rate)
 anno_df <- tibble(
   x1 = c(1, 1, 1),
   x2 = c(2, 3, 4),
-  y = c(
-    min(75, max_rate * 0.82),
-    min(85, max_rate * 0.90),
-    min(95, max_rate * 0.97)
-  ),
+  y = c(max_rate + 11, max_rate + 3, max_rate + 7),
   label = c(
     logit_results$label[logit_results$contrast == "ec1 - NM_1"],
     logit_results$label[logit_results$contrast == "ec1 - NM_2"],
@@ -133,19 +129,19 @@ p <- ggplot(df, aes(x = genotype2, y = rate, color = genotype2)) +
   ) +
   geom_segment(
     data = anno_df,
-    aes(x = x1, xend = x1, y = y, yend = y - 2),
+    aes(x = x1, xend = x1, y = y, yend = y - 0.5),
     inherit.aes = FALSE,
     linewidth = 0.4
   ) +
   geom_segment(
     data = anno_df,
-    aes(x = x2, xend = x2, y = y, yend = y - 2),
+    aes(x = x2, xend = x2, y = y, yend = y - 0.5),
     inherit.aes = FALSE,
     linewidth = 0.4
   ) +
   geom_text(
     data = anno_df,
-    aes(x = (x1 + x2) / 2, y = y + 2, label = label),
+    aes(x = (x1 + x2) / 2, y = y + 0.8, label = label),
     inherit.aes = FALSE,
     size = 4
   ) +

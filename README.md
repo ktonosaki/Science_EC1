@@ -42,12 +42,17 @@ fig5/
 extdata_fig9/
   README.md
   data/
+    extdata_fig9_abnormal_by_line_counts.csv
     extdata_fig9_seed_by_line.csv
   scripts/
+    extdata_fig9_abnormal_by_line.R
     extdata_fig9_seed_by_line.R
   plots/
+    extdata_fig9_abnormal_by_line_summary.pdf
     extdata_fig9_seed_by_line_summary.pdf
   results/
+    extdata_fig9_abnormal_by_line_pvalues.csv
+    extdata_fig9_abnormal_by_line_summary.csv
     extdata_fig9_seed_by_line_pvalues.csv
     extdata_fig9_seed_by_line_summary.csv
 ```
