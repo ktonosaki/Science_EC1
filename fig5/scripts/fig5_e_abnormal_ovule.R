@@ -35,41 +35,36 @@ sum_df <- df %>%
     .groups = "drop"
   )
 
-pairs_all <- list(
-  c("WT", "ec1"),
-  c("WT", "NM"),
-  c("WT", "M_1"),
-  c("ec1", "NM"),
-  c("ec1", "M_1"),
-  c("NM", "M_1")
+df_cmp <- df %>%
+  filter(genotype2 %in% c("ec1", "NM", "M_1")) %>%
+  mutate(genotype2 = droplevels(genotype2))
+
+fit <- glm(
+  cbind(normal, abnormal) ~ genotype2,
+  family = binomial(link = "logit"),
+  data = df_cmp
 )
 
-logit_results <- lapply(pairs_all, function(pair) {
-  g1 <- pair[1]
-  g2 <- pair[2]
-  sub <- dplyr::filter(df, genotype2 %in% c(g1, g2)) %>%
-    mutate(genotype2 = factor(genotype2, levels = c(g1, g2)))
+coef_vec <- coef(fit)
+vcov_mat <- vcov(fit)
+contrast_mat <- rbind(
+  `ec1 - NM` = c(0, -1, 0),
+  `ec1 - M_1` = c(0, 0, -1),
+  `NM - M_1` = c(0, 1, -1)
+)
 
-  fit_null <- glm(
-    cbind(abnormal, normal) ~ 1,
-    family = binomial(link = "logit"),
-    data = sub
-  )
-  fit_full <- glm(
-    cbind(abnormal, normal) ~ genotype2,
-    family = binomial(link = "logit"),
-    data = sub
-  )
-  lrt <- anova(fit_null, fit_full, test = "LRT")
+estimate <- as.vector(contrast_mat %*% coef_vec)
+std_error <- sqrt(diag(contrast_mat %*% vcov_mat %*% t(contrast_mat)))
+z_value <- estimate / std_error
+p_value_raw <- 2 * pnorm(abs(z_value), lower.tail = FALSE)
 
-  tibble(
-    contrast = paste(g1, g2, sep = " - "),
-    chi_square = lrt$Deviance[2],
-    df = lrt$Df[2],
-    p_value_raw = lrt$`Pr(>Chi)`[2]
-  )
-}) %>%
-  bind_rows() %>%
+logit_results <- tibble(
+  contrast = rownames(contrast_mat),
+  estimate = estimate,
+  std_error = std_error,
+  z_value = z_value,
+  p_value_raw = p_value_raw
+) %>%
   mutate(
     p_value = p.adjust(p_value_raw, method = "BH"),
     label = sprintf("P = %.2e", p_value)
