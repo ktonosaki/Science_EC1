@@ -45,42 +45,45 @@ contrast_pairs <- list(
   c("ec1", "NM_3")
 )
 
-logit_results <- lapply(contrast_pairs, function(pair) {
-  g1 <- pair[1]
-  g2 <- pair[2]
-  sub <- dplyr::filter(df, genotype2 %in% c(g1, g2)) %>%
-    mutate(genotype2 = factor(genotype2, levels = c(g1, g2)))
+fit <- glm(
+  cbind(developing, total - developing) ~ genotype2,
+  family = binomial(link = "logit"),
+  data = df
+)
 
-  fit_null <- glm(
-    cbind(developing, total - developing) ~ 1,
-    family = binomial(link = "logit"),
-    data = sub
-  )
-  fit_full <- glm(
-    cbind(developing, total - developing) ~ genotype2,
-    family = binomial(link = "logit"),
-    data = sub
-  )
-  lrt <- anova(fit_null, fit_full, test = "LRT")
+coef_vec <- coef(fit)
+vcov_mat <- vcov(fit)
+contrast_mat <- rbind(
+  `ec1 - NM_1` = c(0, -1, 0, 0),
+  `ec1 - NM_2` = c(0, 0, -1, 0),
+  `ec1 - NM_3` = c(0, 0, 0, -1),
+  `NM_1 - NM_2` = c(0, 1, -1, 0),
+  `NM_1 - NM_3` = c(0, 1, 0, -1),
+  `NM_2 - NM_3` = c(0, 0, 1, -1)
+)
 
-  tibble(
-    contrast = paste(g1, g2, sep = " - "),
-    chi_square = lrt$Deviance[2],
-    df = lrt$Df[2],
-    p_value_raw = lrt$`Pr(>Chi)`[2]
-  )
-}) %>%
-  bind_rows() %>%
+estimate <- as.vector(contrast_mat %*% coef_vec)
+std_error <- sqrt(diag(contrast_mat %*% vcov_mat %*% t(contrast_mat)))
+z_value <- estimate / std_error
+p_value_raw <- 2 * pnorm(abs(z_value), lower.tail = FALSE)
+
+logit_results <- tibble(
+  contrast = rownames(contrast_mat),
+  estimate = estimate,
+  std_error = std_error,
+  z_value = z_value,
+  p_value_raw = p_value_raw
+) %>%
   mutate(
     p_value = p.adjust(p_value_raw, method = "BH"),
-    label = sprintf("P = %.2e", p_value)
+    label = ifelse(p_value >= 0.01, sprintf("P = %.3f", p_value), sprintf("P = %.2e", p_value))
   )
 
 max_rate <- max(df$rate)
 anno_df <- tibble(
   x1 = c(1, 1, 1),
   x2 = c(2, 3, 4),
-  y = c(max_rate + 11, max_rate + 3, max_rate + 7),
+  y = c(79, 89, 102),
   label = c(
     logit_results$label[logit_results$contrast == "ec1 - NM_1"],
     logit_results$label[logit_results$contrast == "ec1 - NM_2"],
@@ -145,13 +148,21 @@ p <- ggplot(df, aes(x = genotype2, y = rate, color = genotype2)) +
     inherit.aes = FALSE,
     size = 4
   ) +
-  scale_color_manual(values = c("ec1" = "#D95F02", "NM_1" = "#7570B3", "NM_2" = "#E7298A", "NM_3" = "#66A61E")) +
-  scale_y_continuous(name = "Normal seed (%)", limits = c(0, 100)) +
-  xlab(NULL) +
+  scale_color_manual(values = c("ec1" = "#F8766D", "NM_1" = "#7CAE00", "NM_2" = "#00BFC4", "NM_3" = "#C77CFF")) +
+  scale_x_discrete(labels = c(
+    "ec1" = "ec1\nnull\nn = 11",
+    "NM_1" = "line 1\nn = 13",
+    "NM_2" = "line 2\nn = 15",
+    "NM_3" = "line 3\nn = 21"
+  )) +
+  scale_y_continuous(name = "Developing seeds (%)", limits = c(0, 105)) +
+  xlab("Sup35NM repl") +
   theme_classic(base_size = 11) +
   theme(
     legend.position = "none",
-    axis.title.y = element_text(size = 11)
+    axis.title.y = element_text(size = 11),
+    axis.title.x = element_text(face = "italic", size = 11),
+    axis.text.x = element_text(size = 9)
   )
 
 if (!dir.exists("../plots")) dir.create("../plots", recursive = TRUE)
