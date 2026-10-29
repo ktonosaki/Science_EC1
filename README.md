@@ -39,22 +39,22 @@ fig5/
     fig5f_normal_seed_pvalues.csv
     fig5f_normal_seed_summary.csv
 
-extdata_fig9/
+figS9/
   README.md
   data/
-    extdata_fig9a_overpenetration_by_line_counts.csv
-    extdata_fig9b_developing_seed_by_line.csv
+    extdata_figS9a_overpenetration_by_line_counts.csv
+    extdata_figS9b_developing_seed_by_line.csv
   scripts/
-    extdata_fig9a_overpenetration_by_line.R
-    extdata_fig9b_developing_seed_by_line.R
+    extdata_figS9a_overpenetration_by_line.R
+    extdata_figS9b_developing_seed_by_line.R
   plots/
-    extdata_fig9a_overpenetration_by_line.pdf
-    extdata_fig9b_developing_seed_by_line.pdf
+    extdata_figS9a_overpenetration_by_line.pdf
+    extdata_figS9b_developing_seed_by_line.pdf
   results/
-    extdata_fig9a_overpenetration_by_line_pvalues.csv
-    extdata_fig9a_overpenetration_by_line_summary.csv
-    extdata_fig9b_developing_seed_by_line_pvalues.csv
-    extdata_fig9b_developing_seed_by_line_summary.csv
+    extdata_figS9a_overpenetration_by_line_pvalues.csv
+    extdata_figS9a_overpenetration_by_line_summary.csv
+    extdata_figS9b_developing_seed_by_line_pvalues.csv
+    extdata_figS9b_developing_seed_by_line_summary.csv
 ```
 
 Each figure gets its own directory so data, scripts, and figure-specific notes remain isolated and easy to track.
