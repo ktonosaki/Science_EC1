@@ -1,6 +1,6 @@
 # Fig. S9
 
-This folder contains the data and analysis scripts for the Extended Data Fig. 9 panel-wise analyses. The count tables are stored as CSV files and read by scripts so the data are not duplicated in code.
+This folder contains the data and analysis scripts for the Fig. S9 panel-wise analyses. The count tables are stored as CSV files and read by scripts so the data are not duplicated in code.
 
 ## Files
 
