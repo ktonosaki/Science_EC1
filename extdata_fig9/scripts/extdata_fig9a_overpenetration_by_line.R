@@ -164,6 +164,6 @@ p <- ggplot(df, aes(x = genotype, y = rate, color = genotype)) +
 if (!dir.exists("../plots")) dir.create("../plots", recursive = TRUE)
 if (!dir.exists("../results")) dir.create("../results", recursive = TRUE)
 
-ggsave("../plots/extdata_fig9a_overpenetration_by_line.pdf", p, width = 5.5, height = 3.5)
-write.csv(summary_df, "../results/extdata_fig9a_overpenetration_by_line_summary.csv", row.names = FALSE)
-write.csv(pvals, "../results/extdata_fig9a_overpenetration_by_line_pvalues.csv", row.names = FALSE)
+ggsave("../plots/extdata_figS9a_overpenetration_by_line.pdf", p, width = 5.5, height = 3.5)
+write.csv(summary_df, "../results/extdata_figS9a_overpenetration_by_line_summary.csv", row.names = FALSE)
+write.csv(pvals, "../results/extdata_figS9a_overpenetration_by_line_pvalues.csv", row.names = FALSE)
