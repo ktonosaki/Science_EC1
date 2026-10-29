@@ -168,6 +168,6 @@ p <- ggplot(df, aes(x = genotype2, y = rate, color = genotype2)) +
 if (!dir.exists("../plots")) dir.create("../plots", recursive = TRUE)
 if (!dir.exists("../results")) dir.create("../results", recursive = TRUE)
 
-ggsave("../plots/extdata_fig9b_developing_seed_by_line.pdf", p, width = 5.5, height = 3.5)
-write.csv(summary_df, "../results/extdata_fig9b_developing_seed_by_line_summary.csv", row.names = FALSE)
-write.csv(logit_results, "../results/extdata_fig9b_developing_seed_by_line_pvalues.csv", row.names = FALSE)
+ggsave("../plots/figS9b_developing_seed_by_line.pdf", p, width = 5.5, height = 3.5)
+write.csv(summary_df, "../results/figS9b_developing_seed_by_line_summary.csv", row.names = FALSE)
+write.csv(logit_results, "../results/figS9b_developing_seed_by_line_pvalues.csv", row.names = FALSE)
