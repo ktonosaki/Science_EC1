@@ -241,7 +241,7 @@ p <- ggplot(df_long, aes(x = genotype, y = rate, color = genotype)) +
   )
 
 if (!dir.exists("../plots")) dir.create("../plots", recursive = TRUE)
-ggsave("../plots/fig3f_abnormal_ovule.pdf", p, width = 3.5, height = 3)
+ggsave("../plots/fig3f_abnormal_ovule.pdf", p, width = 3, height = 3)
 
 # ---------------------------------------------------------------------------
 # Binomial logistic regression with a likelihood-ratio test.
