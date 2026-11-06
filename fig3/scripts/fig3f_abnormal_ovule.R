@@ -163,13 +163,9 @@ anno_df <- data.frame(
   label = logit_results$label
 )
 
-# Create the publication-style boxplot with beeswarm points and significance bars.
+# Create the publication-style boxplot with jittered points and significance bars.
 p <- ggplot(df_long, aes(x = genotype, y = rate, color = genotype)) +
-  geom_beeswarm(
-    size = 2.2,
-    alpha = 0.85,
-    priority = "density"
-  ) +
+  geom_quasirandom(groupOnX = TRUE, width = 0.2, size = 2, alpha = 0.85) +
   geom_linerange(
     data = sum_df,
     aes(x = genotype, ymin = q1, ymax = q3),
