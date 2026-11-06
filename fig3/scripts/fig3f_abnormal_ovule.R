@@ -154,8 +154,6 @@ logit_results <- df_long %>%
   mutate(label = sapply(p_value, p_to_label))
 
 # Use the model-based p-values for the annotation labels shown in the figure.
-y_upper <- max(40, ceiling((max(df_long$rate) + 8) / 5) * 5)
-
 anno_df <- data.frame(
   pheno = levels(df_long$pheno),
   x1 = 1,
@@ -227,7 +225,7 @@ p <- ggplot(df_long, aes(x = genotype, y = rate, color = genotype)) +
   ) +
   facet_wrap(~ pheno, nrow = 1, scales = "fixed") +
   scale_color_manual(values = c("WT" = "grey40", "ec1" = "#D95F02")) +
-  scale_y_continuous(name = "Abnormal ovules (%)", limits = c(0, y_upper)) +
+  scale_y_continuous(name = "Abnormal ovules (%)", limits = c(0, 80)) +
   xlab(NULL) +
   theme_classic(base_size = 11) +
   theme(
@@ -241,7 +239,7 @@ p <- ggplot(df_long, aes(x = genotype, y = rate, color = genotype)) +
   )
 
 if (!dir.exists("../plots")) dir.create("../plots", recursive = TRUE)
-ggsave("../plots/fig3f_abnormal_ovule.pdf", p, width = 3, height = 3)
+ggsave("../plots/fig3f_abnormal_ovule.pdf", p, width = 3, height = 2.8)
 
 # ---------------------------------------------------------------------------
 # Binomial logistic regression with a likelihood-ratio test.
