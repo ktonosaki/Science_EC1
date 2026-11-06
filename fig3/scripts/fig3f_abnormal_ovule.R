@@ -17,18 +17,48 @@ setwd(script_path)
 
 # ---------------------------------------------------------------------------
 # Fig. 3f abnormal ovule phenotype analysis.
-# Keep the raw counts in CSV form and load them here so the analysis script does
-# not duplicate the tabulated data in code.
+# Abnormal counts come from the Fig. 3f table, and denominators come from
+# Fig. 3g per-pistil totals using the shared sample/genotype keys.
 # ---------------------------------------------------------------------------
 
-df <- read.csv(file.path(script_path, "..", "data", "fig3f_abnormal_ovule.csv"), stringsAsFactors = FALSE) %>%
+df_counts <- read.csv(file.path(script_path, "..", "data", "fig3f_abnormal_ovule.csv"), stringsAsFactors = FALSE) %>%
   mutate(
+    sample = as.integer(sample),
     genotype = factor(genotype, levels = c("WT", "ec1")),
-    total = as.integer(total),
+    total_fig3f = as.integer(total),
     normal = as.integer(normal),
     abnormal_1 = as.integer(abnormal_1),
     abnormal_2 = as.integer(abnormal_2)
-  )
+  ) %>%
+  select(sample, genotype, total_fig3f, normal, abnormal_1, abnormal_2)
+
+df_denominator <- read.csv(
+  file.path(script_path, "..", "data", "fig3g_overpenetration_counts.csv"),
+  stringsAsFactors = FALSE
+) %>%
+  mutate(
+    sample = as.integer(sample),
+    genotype = factor(genotype, levels = c("WT", "ec1")),
+    total_denominator = as.integer(total)
+  ) %>%
+  select(sample, genotype, total_denominator)
+
+if (nrow(df_counts) != nrow(df_denominator)) {
+  stop("Fig. 3f and Fig. 3g row counts differ; cannot align per-pistil totals.")
+}
+
+df <- df_counts %>%
+  left_join(df_denominator, by = c("sample", "genotype"))
+
+if (any(is.na(df$total_denominator))) {
+  stop("Missing Fig. 3g denominator rows after joining by sample and genotype.")
+}
+
+if (any(df$abnormal_1 > df$total_denominator | df$abnormal_2 > df$total_denominator)) {
+  stop("Abnormal counts exceed the Fig. 3g per-pistil denominator in one or more rows.")
+}
+
+df <- df %>% mutate(total = total_denominator)
 
 # Convert the count table to a long data frame for plotting and summary stats.
 df_long <- df %>%
@@ -120,13 +150,15 @@ logit_results <- df_long %>%
   mutate(label = sapply(p_value, p_to_label))
 
 # Use the model-based p-values for the annotation labels shown in the figure.
+y_upper <- max(40, ceiling((max(df_long$rate) + 8) / 5) * 5)
+
 anno_df <- data.frame(
   pheno = levels(df_long$pheno),
   x1 = 1,
   x2 = 2,
   y = c(
-    max(df_long$rate[df_long$pheno == levels(df_long$pheno)[1]]) + 5,
-    max(df_long$rate[df_long$pheno == levels(df_long$pheno)[2]]) + 5
+    max(df_long$rate[df_long$pheno == levels(df_long$pheno)[1]]) + 3,
+    max(df_long$rate[df_long$pheno == levels(df_long$pheno)[2]]) + 3
   ),
   label = logit_results$label
 )
@@ -195,7 +227,7 @@ p <- ggplot(df_long, aes(x = genotype, y = rate, color = genotype)) +
   ) +
   facet_wrap(~ pheno, nrow = 1, scales = "fixed") +
   scale_color_manual(values = c("WT" = "grey40", "ec1" = "#D95F02")) +
-  scale_y_continuous(name = "Abnormal ovules (%)", limits = c(0, 40)) +
+  scale_y_continuous(name = "Abnormal ovules (%)", limits = c(0, y_upper)) +
   xlab(NULL) +
   theme_classic(base_size = 11) +
   theme(
