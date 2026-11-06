@@ -54,6 +54,10 @@ if (any(is.na(df$total_denominator))) {
   stop("Missing Fig. 3g denominator rows after joining by sample and genotype.")
 }
 
+if (any(df$total_fig3f != df$total_denominator)) {
+  stop("Fig. 3f total and Fig. 3g denominator totals do not match for one or more rows.")
+}
+
 if (any(df$abnormal_1 > df$total_denominator | df$abnormal_2 > df$total_denominator)) {
   stop("Abnormal counts exceed the Fig. 3g per-pistil denominator in one or more rows.")
 }

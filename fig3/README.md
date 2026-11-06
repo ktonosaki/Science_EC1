@@ -17,4 +17,4 @@ This folder contains the raw data and analysis scripts used for Figure 3. The co
 
 ## Data provenance
 
-Fig. 3f uses abnormal-count numerators from `fig3f_abnormal_ovule.csv` and per-pistil denominators (`total`) from `fig3g_overpenetration_counts.csv`, aligned by `sample` + `genotype`. The Fig. 3g script uses the same per-pistil count table, and p-values are reported from binomial logistic LRT output.
+Fig. 3f uses abnormal-count numerators from `fig3f_abnormal_ovule.csv` and per-pistil denominators (`total`) aligned to `fig3g_overpenetration_counts.csv` by `sample` + `genotype`. The Fig. 3f script validates that both files have matching denominator totals before fitting the model. The Fig. 3g script uses the same per-pistil count table, and p-values are reported from binomial logistic LRT output.
